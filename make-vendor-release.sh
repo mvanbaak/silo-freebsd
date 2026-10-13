@@ -40,10 +40,13 @@ echo "==> go mod vendor"
 echo "==> packaging ${ASSET} (root=vendor/, reproducible)"
 (
 	cd "$work/silo"
-	find vendor | LC_ALL=C sort > "$work/vendor.list"
-	tar --uid 0 --gid 0 --uname root --gname wheel \
-		--mtime '1980-01-01 00:00:00 UTC' --no-recursion \
-		-cf - -T "$work/vendor.list" | gzip -9 -n > "$work/${ASSET}"
+	find vendor -print | LC_ALL=C sort > "$work/vendor.list"
+	# Touch children first so directory mtimes settle after their entries.
+	LC_ALL=C sort -r "$work/vendor.list" |
+		while IFS= read -r p; do touch -h -t 198001010000 "$p"; done
+	tar --uid 0 --gid 0 --uname root --gname wheel --no-recursion \
+		-cf "$work/vendor.tar" -T "$work/vendor.list"
+	gzip -9 -n -c "$work/vendor.tar" > "$work/${ASSET}"
 )
 
 sha=$( (sha256sum "$work/${ASSET}" 2>/dev/null || shasum -a 256 "$work/${ASSET}") | awk '{print $1}')
