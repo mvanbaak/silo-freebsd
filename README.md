@@ -73,15 +73,28 @@ newer one:
 
    - run `make makesum`.
 
-4. `make stage check-plist` must build clean. The port patches four upstream
-   paths; if any changed between refs the patches will not apply and must be
-   regenerated:
+4. `poudriere testport -j <jail> -p <set> -o multimedia/silo` must build clean;
+   `make stage` plus `stage-qa` is only a pre-check on a host without poudriere.
+   The port carries 11 patches against 11 paths. If a modified path changed
+   between refs the patch will not apply and must be regenerated; the two added
+   files must still be absent upstream.
 
+   Modified:
+
+   - `internal/backup/destination.go`
+   - `internal/backup/selective_blobs.go`
+   - `internal/downloadstorage/fs_other.go`
+   - `internal/downloadstorage/fs_unix.go`
+   - `internal/nodemetrics/statfs_other.go`
+   - `internal/nodemetrics/statfs_unix.go`
    - `internal/plugins/binary_platform.go`
    - `internal/plugins/catalog_channels.go`
    - `internal/plugins/catalog_settings.go`
-   - `internal/jellycompat/process_token_other.go` (added by a patch; it must
-     still be absent upstream)
+
+   Added by a patch (must still be absent upstream):
+
+   - `internal/downloadstorage/fstype_freebsd.go`
+   - `internal/jellycompat/process_token_other.go`
 
 ## Requirements
 
